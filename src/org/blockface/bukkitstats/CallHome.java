@@ -29,11 +29,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.config.Configuration;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
 import java.net.URL;
-import java.net.URLConnection;
 
 public class CallHome{
 
@@ -67,8 +64,6 @@ public class CallHome{
 
         return true;
     }
-
-
 }
 
 class CallTask implements Runnable {
@@ -79,8 +74,6 @@ class CallTask implements Runnable {
         this.plugin = plugin;
         if(!pub) this.pub = 0;
     }
-
-
 
     public void run() {
         try {
@@ -99,10 +92,6 @@ class CallTask implements Runnable {
                 pub,
                 Bukkit.getVersion());
 
-        URL oracle = new URL(url);
-        URLConnection yc = oracle.openConnection();
-        BufferedReader in = new BufferedReader(
-                                new InputStreamReader(yc.getInputStream())
-                            );
+        new URL(url).openConnection();
     }
 }

@@ -22,46 +22,40 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 package org.blockface.bukkitstats;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.util.config.Configuration;
+import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.net.URL;
 
 public class CallHome{
-
-    private static Configuration cfg=null;
+    private static final File file = new File("plugins/stats/config.yml");
+    private static final YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 
     public static void load(Plugin plugin) {
-        if(cfg==null) if(!verifyConfig()) return;
+        if(!verifyConfig()) return;
 
-        if(cfg.getBoolean("opt-out",false)) return;
+        if(config.getBoolean("opt-out",false)) return;
 
-        plugin.getServer().getScheduler().scheduleAsyncRepeatingTask(plugin,new CallTask(plugin,cfg.getBoolean("list-server",true)),10L,20L*60L*60);
-        System.out.println(plugin.getDescription().getName() + " is keeping usage stats. To opt-out for whatever bizarre reason, check plugins/stats.");
+        plugin.getServer().getScheduler().scheduleAsyncRepeatingTask(plugin,new CallTask(plugin,config.getBoolean("list-server",true)),10L,20L*60L*60);
+        System.out.println("["+plugin.getDescription().getName()+"] Stats are being kept for this plugin. To opt-out for any reason, check plugins/stats.");
     }
 
     private static Boolean verifyConfig() {
-        File config = new File("plugins/stats/config.yml");
-
-        if(!config.exists())
+        if(!file.exists()) {
             System.out.println("BukkitStats is initializing for the first time. To opt-out check plugins/stats");
-
-        cfg=new Configuration(config);
-        cfg.load();
-        cfg.getBoolean("opt-out",false);
-        cfg.getBoolean("list-server", true);
-        cfg.save();
-
-        if(!config.exists()) {
-            System.out.println("BukkitStats failed to save configuration.");
-            return false;
+            config.set("opt-out", false);
+            config.set("list-server", true);
+            try {
+                config.save(file);
+            } catch(Exception ex) {
+                System.out.println("BukkitStats failed to save");
+                return false;
+            }
         }
-
         return true;
     }
 }
